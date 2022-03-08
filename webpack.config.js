@@ -39,7 +39,7 @@ module.exports = {
       },
 
       {
-        test: /\.(zpt|png|gif|glb|gltf|jpe?g|ogg|mp3|obj|fbx|wav|ttf|fnf|woff|stl|mp4|hdr|webm)$/,
+        test: /\.(zpt|png|gif|glb|gltf|jpe?g|ogg|mp3|obj|fbx|wav|ttf|fnf|woff|stl|mp4|hdr|webm|svg)$/,
         use: [{
           loader: 'file-loader',
           options: {

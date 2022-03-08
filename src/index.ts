@@ -1,133 +1,341 @@
-/// Zappar for ThreeJS Examples
-/// Play animation from button tap
-
-// In this image tracked example we load a 3D model that contains an animation
-// that we'll play if the user taps on an on-screen button
-
 import * as ZapparThree from '@zappar/zappar-threejs';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import model from '../assets/waving.glb';
-import target from '../assets/example-tracking-image.zpt';
+import target from '../assets/marker.zpt';
 import './index.sass';
+import TWEEN from '@tweenjs/tween.js';
+import doorOneTextureUrl from '../assets/doorFirst.png'
+import doorTwoTextureUrl from '../assets/doorTwo.png';
+import image1 from '../assets/image1.jpg'
+import image2 from '../assets/image2.jpg'
+import image3 from '../assets/image3.jpg'
+import image4 from '../assets/image4.jpg'
+import video1 from "../assets/video1.mp4"
+import cube from "../assets/cube.glb"
+import mask3d from "../assets/chert.glb"
+import previousSvg from "../assets/previous.svg";
 
-// The SDK is supported on many different browsers, but there are some that
-// don't provide camera access. This function detects if the browser is supported
-// For more information on support, check out the readme over at
-// https://www.npmjs.com/package/@zappar/zappar-threejs
 if (ZapparThree.browserIncompatible()) {
-  // The browserIncompatibleUI() function shows a full-page dialog that informs the user
-  // they're using an unsupported browser, and provides a button to 'copy' the current page
-  // URL so they can 'paste' it into the address bar of a compatible alternative.
+
   ZapparThree.browserIncompatibleUI();
 
-  // If the browser is not compatible, we can avoid setting up the rest of the page
-  // so we throw an exception here.
   throw new Error('Unsupported browser');
 }
 
-// ZapparThree provides a LoadingManager that shows a progress bar while
-// the assets are downloaded. You can use this if it's helpful, or use
-// your own loading UI - it's up to you :-)
+let Gallery : THREE.Object3D[] = [];
+let IndexGallery:number  = 0;
 const manager = new ZapparThree.LoadingManager();
 
-// Construct our ThreeJS renderer and scene as usual
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 const scene = new THREE.Scene();
 document.body.appendChild(renderer.domElement);
 
-// As with a normal ThreeJS scene, resize the canvas if the window resizes
 renderer.setSize(window.innerWidth, window.innerHeight);
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Create a Zappar camera that we'll use instead of a ThreeJS camera
 const camera = new ZapparThree.Camera();
 
-// In order to use camera and motion data, we need to ask the users for permission
-// The Zappar library comes with some UI to help with that, so let's use it
+
 ZapparThree.permissionRequestUI().then((granted) => {
-  // If the user granted us the permissions we need then we can start the camera
-  // Otherwise let's them know that it's necessary with Zappar's permission denied UI
   if (granted) camera.start();
   else ZapparThree.permissionDeniedUI();
 });
 
-// The Zappar component needs to know our WebGL context, so set it like this:
 ZapparThree.glContextSet(renderer.getContext());
 
-// Set the background of our scene to be the camera background texture
-// that's provided by the Zappar camera
+
 scene.background = camera.backgroundTexture;
 
-// Set an error handler on the loader to help us check if there are issues loading content.
 manager.onError = (url) => console.log(`There was an error loading ${url}`);
 
-// Create a zappar image_tracker and wrap it in an image_tracker_group for us
-// to put our ThreeJS content into
-// Pass our loading manager in to ensure the progress bar works correctly
+
+
 const imageTracker = new ZapparThree.ImageTrackerLoader(manager).load(target);
 const imageTrackerGroup = new ZapparThree.ImageAnchorGroup(camera, imageTracker);
 
-// Add our image tracker group into the ThreeJS scene
 scene.add(imageTrackerGroup);
 
-// Since we're using webpack, we can use the 'file-loader' to make sure these assets are
-// automatically included in our output folder
+var textGroup = new THREE.Group()
+textGroup.position.set(0, 0.5, 0);
+textGroup.setRotationFromEuler(new THREE.Euler(0,90,0))
 
-let action: THREE.AnimationAction;
-let mixer: THREE.AnimationMixer;
+var fontLoader = new THREE.FontLoader();
 
-// Load a 3D model to place within our group (using ThreeJS's GLTF loader)
+fontLoader.load( 'https://raw.githubusercontent.com/shonsirsha/sandbox/master/din_alternate.json', function ( font:any ) {
+  var geometry = new THREE.TextGeometry( 'Байкал', {
+    font: font,
+    size: 0.2,
+    height: 0.1,
+    curveSegments: 3,
+  } );
+
+  geometry.center();
+  var material = new THREE.MeshPhongMaterial({color: 0x282D26});
+  var mesh = new THREE.Mesh( geometry, material );
+  mesh.rotation.y -= Math.PI/2;
+
+  textGroup.add(mesh)
+});
+fontLoader.load( 'https://raw.githubusercontent.com/shonsirsha/sandbox/master/din_alternate.json', function ( font:any ) {
+  var geometry = new THREE.TextGeometry( 'озеро тектонического происхождения', {
+    font: font,
+    size: 0.12,
+    height: 0.1,
+    curveSegments: 3,
+  } );
+
+  geometry.center();
+  var material = new THREE.MeshPhongMaterial({color: 0x282D26});
+  var mesh = new THREE.Mesh( geometry, material );
+  mesh.position.set(0,-0.3,0)
+  mesh.rotation.y -= Math.PI/2;
+
+  textGroup.add(mesh)
+});
+fontLoader.load( 'https://raw.githubusercontent.com/shonsirsha/sandbox/master/din_alternate.json', function ( font:any ) {
+  var geometry = new THREE.TextGeometry( 'в южной части Восточной Сибири', {
+    font: font,
+    size: 0.12,
+    height: 0.1,
+    curveSegments: 3,
+  } );
+
+  geometry.center();
+  var material = new THREE.MeshPhongMaterial({color: 0x282D26});
+  var mesh = new THREE.Mesh( geometry, material );
+  mesh.position.set(0,-0.6,0)
+  mesh.rotation.y -= Math.PI/2;
+
+  textGroup.add(mesh)
+});
+fontLoader.load( 'https://raw.githubusercontent.com/shonsirsha/sandbox/master/din_alternate.json', function ( font:any ) {
+  var geometry = new THREE.TextGeometry( 'самое глубокое озеро на планете', {
+    font: font,
+    size: 0.12,
+    height: 0.1,
+    curveSegments: 3,
+  } );
+
+  geometry.center();
+  var material = new THREE.MeshPhongMaterial({color: 0x282D26});
+  var mesh = new THREE.Mesh( geometry, material );
+  mesh.position.set(0,-0.9,0)
+  mesh.rotation.y -= Math.PI/2;
+
+  textGroup.add(mesh)
+});
+
+textGroup.visible = false
+imageTrackerGroup.add(textGroup)
+Gallery.push(textGroup)
+
+var image1Sprite = new THREE.Sprite( new THREE.SpriteMaterial( { map: new THREE.TextureLoader().load( image1 ), color: 0xffffff } ) );
+var image2Sprite = new THREE.Sprite( new THREE.SpriteMaterial( { map: new THREE.TextureLoader().load( image2 ), color: 0xffffff } ) );
+var image3Sprite = new THREE.Sprite( new THREE.SpriteMaterial( { map: new THREE.TextureLoader().load( image3 ), color: 0xffffff } ) );
+var image4Sprite = new THREE.Sprite( new THREE.SpriteMaterial( { map: new THREE.TextureLoader().load( image4 ), color: 0xffffff } ) );
+image1Sprite.position.set(-0.7,0,0)
+image3Sprite.position.set(-0.7,0,0)
+
+image2Sprite.position.set(0.7,0,0)
+image4Sprite.position.set(0.7,0,0)
+
+var imageSummerGroup = new THREE.Group()
+imageSummerGroup.add(image1Sprite, image2Sprite )
+imageSummerGroup.visible = false
+
+var imageWinterGroup = new THREE.Group()
+imageWinterGroup.add(image3Sprite, image4Sprite )
+imageWinterGroup.visible = false
+
+Gallery.push(imageSummerGroup)
+Gallery.push(imageWinterGroup)
+
+//imageTrackerGroup.add(imageWinterGroup)
+
+
+const video = document.getElementById( 'video' ) as any;
+video.src = video1
+const videoTexture = new THREE.VideoTexture(video);
+const videoMaterial =  new THREE.MeshBasicMaterial( {map: videoTexture, side: THREE.FrontSide, toneMapped: false} );
+const screen = new THREE.PlaneGeometry(2, 2);
+const videoScreen = new THREE.Mesh(screen, videoMaterial);
+videoScreen.visible = false;
+video.play();
+
+
+//imageTrackerGroup.add(videoScreen)
+Gallery.push(videoScreen)
+
+var model3d = new THREE.Group();
+
 const gltfLoader = new GLTFLoader(manager);
-gltfLoader.load(model, (gltf) => {
-  // get the animation and re-declare mixer and action.
-  // which will then be triggered on button press
-  mixer = new THREE.AnimationMixer(gltf.scene);
-  action = mixer.clipAction(gltf.animations[0]);
-
-  // Now the model has been loaded, we can roate it and add it to our image_tracker_group
-  imageTrackerGroup.add(gltf.scene.rotateX(Math.PI / 2));
+gltfLoader.load(cube, (gltf) => {
+  gltf.scene.position.set(0,0,0);
+  gltf.scene.scale.set(2.1, 2.1, 2.1);
+  model3d.add(gltf.scene);
 }, undefined, () => {
   console.log('An error ocurred loading the GLTF model');
 });
 
-// Light up our scene with an ambient light
-imageTrackerGroup.add(new THREE.AmbientLight(0xffffff));
+model3d.visible = false;
 
-// Create a new div element on the document
-const button = document.createElement('div');
+Gallery.push(model3d)
 
-button.setAttribute('class', 'circle');
+var mask = new THREE.Group();
+var mixer:any;
+gltfLoader.load(mask3d, (gltf) => {
+  mixer = new THREE.AnimationMixer(gltf.scene) as any
+  const animationAction = mixer.clipAction(gltf.animations[0])
+  animationAction.play()
+  gltf.scene.position.set(0,0,0);
+  gltf.scene.scale.set(2.1, 2.1, 2.1);
+  mask.add(gltf.scene);
+}, undefined, () => {
+  console.log('An error ocurred loading the GLTF model');
+});
 
-// On click, play the gltf's action
-button.onclick = () => { action.play(); };
+mask.visible = false;
 
-// Append the button to our document's body
-document.body.appendChild(button);
+Gallery.push(mask)
 
-// When we lose sight of the camera, hide the scene contents.
-imageTracker.onVisible.bind(() => { scene.visible = true; });
-imageTracker.onNotVisible.bind(() => { scene.visible = false; });
 
-// Used to get deltaTime for our animations.
-const clock = new THREE.Clock();
+function onNextClick(){
+  IndexGallery++
+  if (IndexGallery == Gallery.length){
+    IndexGallery = 0
+  }
+  imageTrackerGroup.remove(imageTrackerGroup.children[imageTrackerGroup.children[0].name == "doors"? 1:0])
+  Gallery[IndexGallery].visible = true;
+  imageTrackerGroup.add(Gallery[IndexGallery])
 
-// Use a function to render our scene as usual
-function render(): void {
-  // If the mixer has been declared, update our animations with delta time
-  if (mixer) mixer.update(clock.getDelta());
+}
+const directionalLight = new THREE.DirectionalLight('white',12);
+directionalLight.position.set(-2, 1, 0);
+directionalLight.lookAt(0, 0, 0);
+scene.add(directionalLight);
 
-  // The Zappar camera must have updateFrame called every frame
-  camera.updateFrame(renderer);
+const ambeintLight = new THREE.AmbientLight('white', 0.4);
+scene.add(ambeintLight);
 
-  // Draw the ThreeJS scene in the usual way, but using the Zappar camera
-  renderer.render(scene, camera);
+const PlayButton = <HTMLButtonElement>document.getElementById('PlayButton');
+const NextButton = <HTMLButtonElement>document.getElementById('NextButton') ;
+let previousBtn = document.getElementById("previousBtn");
+(previousBtn?.children[0] as any).src = previousSvg;
 
-  // Call render() again next frame
-  requestAnimationFrame(render);
+NextButton.onclick = () => onNextClick()
+NextButton.style.display = 'none';
+
+let targetSeen = false;
+let doorsOpen = false;
+
+const doorOneTexture = new THREE.TextureLoader().load(doorOneTextureUrl);
+const doorTwoTexture = new THREE.TextureLoader().load(doorTwoTextureUrl);
+
+const doorOneMesh = new THREE.Mesh(
+  new THREE.BoxBufferGeometry(1.6, 2, 0.1),
+  new THREE.MeshBasicMaterial({ map: doorOneTexture }),
+);
+const doorOne = new THREE.Object3D();
+doorOne.add(doorOneMesh.clone());
+doorOne.children[0].position.set(0.7, 0, 0);
+doorOne.position.set(-1.5, 0, 0);
+
+const doorTwoMesh = new THREE.Mesh(
+  new THREE.BoxBufferGeometry(1.6, 2, 0.1),
+  new THREE.MeshBasicMaterial({ map: doorTwoTexture }),
+);
+
+const doorTwo = new THREE.Object3D();
+doorTwo.add(doorTwoMesh.clone());
+doorTwo.children[0].position.set(-0.7, 0, 0);
+doorTwo.position.set(1.5, 0, 0);
+
+const doors = new THREE.Group();
+doors.name = "doors"
+doors.position.set(0, 0, 0);
+doors.add(doorOne, doorTwo);
+
+doors.visible = false;
+imageTrackerGroup.add(doors);
+
+const doorRotation = { y: 0 };
+const openTarget = { y: -1.6 };
+
+const tweenOpenDoor = new TWEEN.Tween(doorRotation).to(openTarget, 2000)
+  .easing(TWEEN.Easing.Bounce.Out).onUpdate(() => {
+    doorOne.rotation.y = doorRotation.y;
+    doorTwo.rotation.y = -doorRotation.y;
+  })
+  .onStart(() => {
+    doorsOpen = true;
+    PlayButton.style.display = 'none';
+    console.log(imageTrackerGroup.children)
+    imageTrackerGroup.children[imageTrackerGroup.children[0].name == "doors"?1:0].visible = true
+
+  })
+  .onComplete(()=>{
+    NextButton.style.display = 'block';
+    PlayButton.style.display = 'block';
+    PlayButton.innerHTML = "закрыть"
+  });
+
+const tweenCloseDoor = new TWEEN.Tween(doorRotation).to({ y: 0 }, 2000)
+  .easing(TWEEN.Easing.Bounce.Out).onUpdate(() => {
+    doorOne.rotation.y = doorRotation.y;
+    doorTwo.rotation.y = -doorRotation.y;
+  })
+  .onStart(()=>{
+    PlayButton.style.display = 'none';
+    imageTrackerGroup.children[imageTrackerGroup.children[0].name == "doors"?1:0].visible = false
+    NextButton.style.display = 'none';
+
+  })
+  .onComplete(() => {
+    doorsOpen = false;
+    PlayButton.style.display = 'block';
+    PlayButton.innerHTML = "открыть"
+  });
+
+function doorsAnim() {
+  PlayButton.innerHTML == "открыть"?   tweenOpenDoor.start() : tweenCloseDoor.start()
 }
 
-// Start things off
+imageTracker.onVisible.bind(() => {
+  doors.visible = true;
+
+  if (!targetSeen) {
+    targetSeen = true;
+  }
+
+  if (!doorsOpen) {
+    PlayButton.style.display = 'block';
+  }
+});
+imageTracker.onNotVisible.bind(() => {
+  doors.visible = false;
+
+  if (targetSeen) {
+    targetSeen = false;
+  }
+
+  PlayButton.style.display = 'none';
+});
+
+PlayButton.onclick = () => doorsAnim()
+const clock = new THREE.Clock()
+
+function render(): void {
+
+  camera.updateFrame(renderer);
+
+  renderer.render(scene, camera);
+  TWEEN.update();
+
+  requestAnimationFrame(render);
+  mixer.update(clock.getDelta())
+
+}
+
 render();

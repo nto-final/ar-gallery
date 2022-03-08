@@ -2,14 +2,24 @@
 <html>
 
 <head>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap" rel="stylesheet">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,user-scalable=no,minimal-ui" />
   <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 
 <body>
+  <div class="header">
+    <button class="previousBtn" id="previousBtn" onclick="history.back();"><img id="previousImg" ></button>
+    <div>AR Галерея</div>
+  </div>
+  <button id="PlayButton" class="btnTxt">открыть</button>
+  <button id="NextButton" class="btnTxt" style="top:60%">далее</button>
+  <video id="video" playsinline webkit-playsinline muted loop autoplay   style="display: none;"></video>
 
+  </video>
 </body>
 
 </html>
