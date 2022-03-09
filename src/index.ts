@@ -14,7 +14,7 @@ import video1 from "../assets/video1.mp4"
 import cube from "../assets/cube.glb"
 import mask3d from "../assets/chert.glb"
 import previousSvg from "../assets/previous.svg";
-
+import music from "../assets/music.m4a";
 if (ZapparThree.browserIncompatible()) {
 
   ZapparThree.browserIncompatibleUI();
@@ -50,7 +50,18 @@ scene.background = camera.backgroundTexture;
 
 manager.onError = (url) => console.log(`There was an error loading ${url}`);
 
+const listener = new THREE.AudioListener();
+camera.add( listener );
 
+const sound = new THREE.Audio( listener );
+
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load(  music, function( buffer ) {
+	sound.setBuffer( buffer );
+	sound.setLoop( true );
+	sound.setVolume( 0.5 );
+	sound.play();
+});
 
 const imageTracker = new ZapparThree.ImageTrackerLoader(manager).load(target);
 const imageTrackerGroup = new ZapparThree.ImageAnchorGroup(camera, imageTracker);
